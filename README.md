@@ -78,7 +78,7 @@ This app was created as a **personal passion project** and learning tool for Fre
 ## 🔗 Links
 
 - 🌐 Live App: [Coming Soon](#)
-- 💻 GitHub Repo: [https://github.com/your-username/french-helper-app](https://github.com/your-username/french-helper-app)
+- 💻 GitHub Repo: [https://github.com/paarthmahajan1/french-helper-app](https://github.com/paarthmahajan1/french-helper-app)
 - 📄 Personal Portfolio: [www.paarthmahajan09.com](http://www.paarthmahajan09.com)
 
 ---

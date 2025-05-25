@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>French Helper App - By Paarth Mahajan</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    background: #0077cc;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+  }
+  main {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #ccc;
+  }
+  nav button {
+    margin: 0.3rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background: #0077cc;
+    color: white;
+    transition: background 0.3s;
+  }
+  nav button:hover {
+    background: #005fa3;
+  }
+  section {
+    margin-top: 2rem;
+  }
+  h2 {
+    color: #0077cc;
+  }
+  #vocab-list {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  #vocab-list > div {
+    flex: 1 1 45%;
+    background: #e7f0fd;
+    padding: 1rem;
+    border-radius: 6px;
+  }
+  #vocab-list ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  #vocab-list li {
+    padding: 0.3rem 0;
+  }
+  #quiz-question {
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  #quiz-options button {
+    display: block;
+    width: 100%;
+    margin: 0.3rem 0;
+    padding: 0.8rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #0077cc;
+    background: white;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+  #quiz-options button:hover {
+    background: #0077cc;
+    color: white;
+  }
+  #quiz-feedback {
+    margin-top: 1rem;
+    font-weight: bold;
+  }
+  #writing-input {
+    width: 100%;
+    height: 100px;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  #writing-feedback {
+    margin-top: 1rem;
+    font-weight: bold;
+  }
+  #add-word-form input[type="text"] {
+    padding: 0.5rem;
+    font-size: 1rem;
+    margin-right: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  #add-word-form button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    background: #28a745;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  #add-word-form button:hover {
+    background: #1e7e34;
+  }
+  #progress-list {
+    list-style: none;
+    padding-left: 0;
+  }
+  #progress-list li {
+    margin: 0.5rem 0;
+  }
+  footer {
+    text-align: center;
+    margin: 2rem 0;
+    color: #777;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>French Helper App</h1>
+  <p>Created by Paarth Mahajan</p>
+</header>
+
+<main>
+  <nav>
+    <button id="btn-vocab">Vocabulary</button>
+    <button id="btn-quiz">Quiz</button>
+    <button id="btn-writing">Writing Practice</button>
+    <button id="btn-add-word">Add Word</button>
+    <button id="btn-progress">Progress</button>
+  </nav>
+
+  <section id="section-vocab" style="display:none;">
+    <h2>Vocabulary</h2>
+    <div id="vocab-list">
+      <div>
+        <h3>Easy Words</h3>
+        <ul id="vocab-easy"></ul>
+      </div>
+      <div>
+        <h3>Complex Words</h3>
+        <ul id="vocab-complex"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="section-quiz" style="display:none;">
+    <h2>Quiz</h2>
+    <div id="quiz-question"></div>
+    <div id="quiz-options"></div>
+    <div id="quiz-feedback"></div>
+    <button id="btn-next-question" style="display:none; margin-top:1rem;">Next Question</button>
+  </section>
+
+  <section id="section-writing" style="display:none;">
+    <h2>Writing Practice</h2>
+    <textarea id="writing-input" placeholder="Write your French sentence here..."></textarea><br />
+    <button id="btn-check-writing">Check Writing</button>
+    <button id="btn-clear-writing">Clear</button>
+    <div id="writing-feedback"></div>
+  </section>
+
+  <section id="section-add-word" style="display:none;">
+    <h2>Add New Vocabulary Word</h2>
+    <form id="add-word-form">
+      <input type="text" id="new-word" placeholder="French Word" required />
+      <input type="text" id="new-meaning" placeholder="English Meaning" required />
+      <select id="new-level" required>
+        <option value="" disabled selected>Select Difficulty</option>
+        <option value="easy">Easy</option>
+        <option value="complex">Complex</option>
+      </select>
+      <button type="submit">Add Word</button>
+    </form>
+  </section>
+
+  <section id="section-progress" style="display:none;">
+    <h2>Your Progress</h2>
+    <ul id="progress-list"></ul>
+  </section>
+</main>
+
+<footer>
+  <p>© 2025 Paarth Mahajan | French Helper App</p>
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+  // === Data ===
+  const defaultVocabulary = {
+    easy: [
+      { french: "bonjour", meaning: "hello" },
+      { french: "merci", meaning: "thank you" },
+      { french: "chat", meaning: "cat" },
+      { french: "chien", meaning: "dog" },
+      { french: "pomme", meaning: "apple" },
+      { french: "maison", meaning: "house" },
+      { french: "livre", meaning: "book" },
+      { french: "fromage", meaning: "cheese" },
+      { french: "eau", meaning: "water" },
+      { french: "soleil", meaning: "sun" },
+      { french: "fleur", meaning: "flower" },
+      { french: "pain", meaning: "bread" },
+      { french: "porte", meaning: "door" },
+      { french: "voiture", meaning: "car" },
+      { french: "table", meaning: "table" }
+    ],
+    complex: [
+      { french: "extraordinaire", meaning: "extraordinary" },
+      { french: "mélancolie", meaning: "melancholy" },
+      { french: "éphémère", meaning: "ephemeral" },
+      { french: "inoubliable", meaning: "unforgettable" },
+      { french: "réussir", meaning: "to succeed" },
+      { french: "aventure", meaning: "adventure" },
+      { french: "énigmatique", meaning: "enigmatic" },
+      { french: "effrayant", meaning: "frightening" },
+      { french: "splendide", meaning: "splendid" },
+      { french: "persévérance", meaning: "perseverance" },
+      { french: "indispensable", meaning: "indispensable" },
+      { french: "éphémère", meaning: "ephemeral" },
+      { french: "véritable", meaning: "true, real" },
+      { french: "soulagement", meaning: "relief" },
+      { french: "indignation", meaning: "indignation" }
+    ]
+  };
+
+  // 30 quiz questions with multiple-choice answers
+  const quizQuestions = [
+    {
+      question: "What is the French word for 'apple'?",
+      options: ["pomme", "chien", "chat", "fromage"],
+      answer: 0
+    },
+    {
+      question: "Translate 'thank you' into French:",
+      options: ["bonjour", "merci", "au revoir", "s’il vous plaît"],
+      answer: 1
+    },
+    {
+      question: "Which word means 'dog' in French?",
+      options: ["chat", "chien", "cheval", "oiseau"],
+      answer: 1
+    },
+    {
+      question: "What does 'maison' mean?",
+      options: ["car", "table", "house", "door"],
+      answer: 2
+    },
+    {
+      question: "Translate 'extraordinary' into French:",
+      options: ["extraordinaire", "ordinaire", "fantastique", "normal"],
+      answer: 0
+    },
+    {
+      question: "What is the French word for 'sun'?",
+      options: ["lune", "étoile", "soleil", "nuage"],
+      answer: 2
+    },
+    {
+      question: "Which word means 'book'?",
+      options: ["livre", "stylo", "chaise", "fenêtre"],
+      answer: 0
+    },
+    {
+      question: "Translate 'to succeed' into French:",
+      options: ["échouer", "réussir", "commencer", "finir"],
+      answer: 1
+    },
+    {
+      question: "What does 'chien' mean?",
+      options: ["cat", "dog", "bird", "fish"],
+      answer: 1
+    },
+    {
+      question: "What is 'thank you' in French?",
+      options: ["merci", "bonjour", "au revoir", "s'il vous plaît"],
+      answer: 0
+    },
+    {
+      question: "Translate 'flower' into French:",
+      options: ["fleur", "arbre", "herbe", "feuille"],
+      answer: 0
+    },
+    {
+      question: "Which word means 'door'?",
+      options: ["fenêtre", "porte", "toit", "mur"],
+      answer: 1
+    },
+    {
+      question: "Translate 'perseverance' into French:",
+      options: ["persévérance", "paresse", "sagesse", "puissance"],
+      answer: 0
+    },
+    {
+      question: "What does 'voiture' mean?",
+      options: ["bike", "car", "train", "plane"],
+      answer: 1
+    },
+    {
+      question: "Translate 'bread' into French:",
+      options: ["pain", "fromage", "beurre", "sucre"],
+      answer: 0
+    },
+    {
+      question: "What is 'water' in French?",
+      options: ["lait", "vin", "eau", "jus"],
+      answer: 2
+    },
+    {
+      question: "Translate 'melancholy' into French:",
+      options: ["mélancolie", "joie", "colère", "peur"],
+      answer: 0
+    },
+    {
+      question: "What does 'étoile' mean?",
+      options: ["star", "moon", "cloud", "rain"],
+      answer: 0
+    },
+    {
+      question: "Translate 'relief' into French:",
+      options: ["soulagement", "douleur", "colère", "joie"],
+      answer: 0
+    },
+    {
+      question: "What does 'porte' mean?",
+      options: ["wall", "door", "roof", "floor"],
+      answer: 1
+    },
+    {
+      question: "Translate 'unforgettable' into French:",
+      options: ["inoubliable", "oubliable", "mémorable", "passager"],
+      answer: 0
+    },
+    {
+      question: "What is the French word for 'cat'?",
+      options: ["chien", "chat", "souris", "lapin"],
+      answer: 1
+    },
+    {
+      question: "Translate 'frightening' into French:",
+      options: ["effrayant", "amusant", "ennuyeux", "heureux"],
+      answer: 0
+    },
+    {
+      question: "What does 'table' mean?",
+      options: ["chair", "table", "bed", "door"],
+      answer: 1
+    },
+    {
+      question: "Translate 'adventure' into French:",
+      options: ["aventure", "ennui", "vacances", "travail"],
+      answer: 0
+    },
+    {
+      question: "What is the French word for 'true' or 'real'?",
+      options: ["faux", "véritable", "fictif", "imaginaire"],
+      answer: 1
+    },
+    {
+      question: "Translate 'cheese' into French:",
+      options: ["fromage", "beurre", "lait", "pain"],
+      answer: 0
+    },
+    {
+      question: "What does 'école' mean?",
+      options: ["school", "church", "hospital", "market"],
+      answer: 0
+    },
+    {
+      question: "Translate 'indispensable' into French:",
+      options: ["nécessaire", "indispensable", "inutile", "facultatif"],
+      answer: 1
+    },
+    {
+      question: "What is 'sun' in French?",
+      options: ["soleil", "lune", "étoile", "ciel"],
+      answer: 0
+    }
+  ];
+
+  // === State ===
+  let vocabulary = JSON.parse(localStorage.getItem('vocabulary')) || defaultVocabulary;
+  let progress = JSON.parse(localStorage.getItem('progress')) || {
+    correctAnswers: 0,
+    totalQuestions: 0,
+    writingChecks: 0,
+  };
+
+  let currentQuizIndex = 0;
+  let quizAnswered = false;
+
+  // === Elements ===
+  const sections = {
+    vocab: document.getElementById('section-vocab'),
+    quiz: document.getElementById('section-quiz'),
+    writing: document.getElementById('section-writing'),
+    addWord: document.getElementById('section-add-word'),
+    progress: document.getElementById('section-progress'),
+  };
+
+  const navButtons = {
+    vocab: document.getElementById('btn-vocab'),
+    quiz: document.getElementById('btn-quiz'),
+    writing: document.getElementById('btn-writing'),
+    addWord: document.getElementById('btn-add-word'),
+    progress: document.getElementById('btn-progress'),
+  };
+
+  const vocabEasyList = document.getElementById('vocab-easy');
+  const vocabComplexList = document.getElementById('vocab-complex');
+
+  const quizQuestionEl = document.getElementById('quiz-question');
+  const quizOptionsEl = document.getElementById('quiz-options');
+  const quizFeedbackEl = document.getElementById('quiz-feedback');
+  const nextQuestionBtn = document.getElementById('btn-next-question');
+
+  const writingInput = document.getElementById('writing-input');
+  const writingFeedback = document.getElementById('writing-feedback');
+  const btnCheckWriting = document.getElementById('btn-check-writing');
+  const btnClearWriting = document.getElementById('btn-clear-writing');
+
+  const addWordForm = document.getElementById('add-word-form');
+  const newWordInput = document.getElementById('new-word');
+  const newMeaningInput = document.getElementById('new-meaning');
+  const newLevelSelect = document.getElementById('new-level');
+
+  const progressList = document.getElementById('progress-list');
+
+  // === Functions ===
+
+  // Show only one section at a time
+  function showSection(sectionKey) {
+    for (const key in sections) {
+      sections[key].style.display = key === sectionKey ? 'block' : 'none';
+    }
+  }
+
+  // Render Vocabulary Lists
+  function renderVocabulary() {
+    vocabEasyList.innerHTML = '';
+    vocabulary.easy.forEach(word => {
+      const li = document.createElement('li');
+      li.textContent = `${word.french} — ${word.meaning}`;
+      vocabEasyList.appendChild(li);
+    });
+    vocabComplexList.innerHTML = '';
+    vocabulary.complex.forEach(word => {
+      const li = document.createElement('li');
+      li.textContent = `${word.french} — ${word.meaning}`;
+      vocabComplexList.appendChild(li);
+    });
+  }
+
+  // Quiz Rendering & Logic
+  function renderQuizQuestion() {
+    quizAnswered = false;
+    quizFeedbackEl.textContent = '';
+    nextQuestionBtn.style.display = 'none';
+
+    if (currentQuizIndex >= quizQuestions.length) {
+      quizQuestionEl.textContent = "Quiz complete! Great job!";
+      quizOptionsEl.innerHTML = '';
+      return;
+    }
+
+    const q = quizQuestions[currentQuizIndex];
+    quizQuestionEl.textContent = `${currentQuizIndex + 1}. ${q.question}`;
+    quizOptionsEl.innerHTML = '';
+
+    q.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.textContent = opt;
+      btn.disabled = false;
+      btn.onclick = () => handleQuizAnswer(idx);
+      quizOptionsEl.appendChild(btn);
+    });
+  }
+
+  function handleQuizAnswer(selectedIdx) {
+    if (quizAnswered) return;
+    quizAnswered = true;
+    const q = quizQuestions[currentQuizIndex];
+    const buttons = quizOptionsEl.querySelectorAll('button');
+    buttons.forEach(btn => btn.disabled = true);
+
+    if (selectedIdx === q.answer) {
+      quizFeedbackEl.textContent = "Correct!";
+      quizFeedbackEl.style.color = "green";
+      progress.correctAnswers++;
+    } else {
+      quizFeedbackEl.textContent = `Wrong! Correct answer: "${q.options[q.answer]}"`;
+      quizFeedbackEl.style.color = "red";
+    }
+    progress.totalQuestions++;
+    saveProgress();
+
+    nextQuestionBtn.style.display = 'inline-block';
+  }
+
+  function nextQuizQuestion() {
+    currentQuizIndex++;
+    renderQuizQuestion();
+  }
+
+  // Writing Practice Logic (basic spellcheck against vocabulary)
+  function checkWriting() {
+    const text = writingInput.value.trim().toLowerCase();
+    if (!text) {
+      writingFeedback.textContent = "Please write something to check.";
+      writingFeedback.style.color = "red";
+      return;
+    }
+
+    // Check if all French words are in vocabulary (very simple check)
+    // Split text into words ignoring punctuation
+    const words = text.match(/\b\w+\b/g) || [];
+    if (words.length === 0) {
+      writingFeedback.textContent = "No recognizable words found.";
+      writingFeedback.style.color = "red";
+      return;
+    }
+
+    // Flatten vocab words to a set for quick lookup
+    const vocabWordsSet = new Set(
+      [...vocabulary.easy, ...vocabulary.complex].map(w => w.french.toLowerCase())
+    );
+
+    // Find unknown words
+    const unknownWords = words.filter(w => !vocabWordsSet.has(w));
+
+    if (unknownWords.length === 0) {
+      writingFeedback.textContent = "Great! All words are recognized.";
+      writingFeedback.style.color = "green";
+    } else {
+      writingFeedback.textContent = `Unknown words: ${unknownWords.join(', ')}`;
+      writingFeedback.style.color = "orange";
+    }
+
+    progress.writingChecks++;
+    saveProgress();
+  }
+
+  // Clear writing input and feedback
+  function clearWriting() {
+    writingInput.value = '';
+    writingFeedback.textContent = '';
+  }
+
+  // Add new vocabulary word
+  function addNewWord(e) {
+    e.preventDefault();
+
+    const french = newWordInput.value.trim().toLowerCase();
+    const meaning = newMeaningInput.value.trim();
+    const level = newLevelSelect.value;
+
+    if (!french || !meaning || !level) {
+      alert("Please fill all fields correctly.");
+      return;
+    }
+
+    // Check if word already exists in vocab
+    const exists = vocabulary.easy.concat(vocabulary.complex).some(w => w.french === french);
+    if (exists) {
+      alert("This word already exists in the vocabulary.");
+      return;
+    }
+
+    vocabulary[level].push({ french, meaning });
+    saveVocabulary();
+    renderVocabulary();
+
+    alert(`Added "${french}" to ${level} vocabulary.`);
+    addWordForm.reset();
+  }
+
+  // Save and load vocab from localStorage
+  function saveVocabulary() {
+    localStorage.setItem('vocabulary', JSON.stringify(vocabulary));
+  }
+
+  // Save and load progress from localStorage
+  function saveProgress() {
+    localStorage.setItem('progress', JSON.stringify(progress));
+  }
+
+  // Render progress stats
+  function renderProgress() {
+    progressList.innerHTML = '';
+    const totalQ = progress.totalQuestions || 1; // avoid div by zero
+    const correct = progress.correctAnswers || 0;
+    const accuracy = ((correct / totalQ) * 100).toFixed(1);
+
+    const li1 = document.createElement('li');
+    li1.textContent = `Quiz Questions Attempted: ${totalQ}`;
+    const li2 = document.createElement('li');
+    li2.textContent = `Correct Answers: ${correct}`;
+    const li3 = document.createElement('li');
+    li3.textContent = `Quiz Accuracy: ${accuracy}%`;
+    const li4 = document.createElement('li');
+    li4.textContent = `Writing Practice Checks Done: ${progress.writingChecks || 0}`;
+
+    progressList.appendChild(li1);
+    progressList.appendChild(li2);
+    progressList.appendChild(li3);
+    progressList.appendChild(li4);
+  }
+
+  // Initialize app: set listeners and default view
+  function init() {
+    // Show vocab by default on load
+    showSection('vocab');
+    renderVocabulary();
+
+    // Nav buttons listeners
+    navButtons.vocab.onclick = () => {
+      showSection('vocab');
+      renderVocabulary();
+    };
+    navButtons.quiz.onclick = () => {
+      showSection('quiz');
+      currentQuizIndex = 0;
+      renderQuizQuestion();
+    };
+    navButtons.writing.onclick = () => {
+      showSection('writing');
+      clearWriting();
+    };
+    navButtons.addWord.onclick = () => {
+      showSection('addWord');
+    };
+    navButtons.progress.onclick = () => {
+      showSection('progress');
+      renderProgress();
+    };
+
+    nextQuestionBtn.onclick = nextQuizQuestion;
+    btnCheckWriting.onclick = checkWriting;
+    btnClearWriting.onclick = clearWriting;
+    addWordForm.onsubmit = addNewWord;
+  }
+
+  init();
+
+});
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>French Helper App by Paarth Mahajan</title>
+<style>
+  /* Reset & basics */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f6f8;
+    color: #333;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  body.dark {
+    background: #121212;
+    color: #eee;
+  }
+  header {
+    background: #007ACC;
+    color: white;
+    padding: 15px 10px;
+    text-align: center;
+    font-size: 1.8em;
+    font-weight: bold;
+    user-select: none;
+  }
+  nav {
+    background: #005a99;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 0;
+  }
+  nav button {
+    background: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+  nav button:hover {
+    background: #cce4ff;
+  }
+  nav button.active {
+    background: #004080;
+    color: white;
+  }
+  main {
+    max-width: 900px;
+    margin: 20px auto 40px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.1);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  body.dark main {
+    background: #1e1e1e;
+    color: #eee;
+    box-shadow: 0 4px 20px rgb(255 255 255 / 0.15);
+  }
+  section {
+    display: none;
+  }
+  section.active {
+    display: block;
+  }
+  h2 {
+    margin-top: 0;
+    color: #007ACC;
+  }
+  body.dark h2 {
+    color: #66aaff;
+  }
+  /* Vocabulary */
+  .vocab-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  .vocab-list {
+    flex: 1 1 45%;
+    background: #e6f0ff;
+    border-radius: 6px;
+    padding: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  body.dark .vocab-list {
+    background: #2a2a2a;
+  }
+  .vocab-list h3 {
+    margin-top: 0;
+  }
+  .vocab-list ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+  .vocab-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid #cce0ff;
+  }
+  body.dark .vocab-list li {
+    border-bottom: 1px solid #444;
+  }
+  /* Quiz */
+  .quiz-question {
+    font-size: 1.3em;
+    margin-bottom: 15px;
+  }
+  .quiz-options button {
+    display: block;
+    width: 100%;
+    margin: 7px 0;
+    padding: 10px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border: 2px solid #007ACC;
+    background: white;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+  }
+  .quiz-options button:hover:not(:disabled) {
+    background: #cce4ff;
+  }
+  .quiz-options button:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+  body.dark .quiz-options button {
+    background: #333;
+    border-color: #66aaff;
+    color: #eee;
+  }
+  body.dark .quiz-options button:hover:not(:disabled) {
+    background: #0050b3;
+  }
+  #quiz-feedback {
+    margin-top: 15px;
+    font-weight: 700;
+    font-size: 1.2em;
+  }
+  #next-question-btn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-weight: 700;
+    background: #007ACC;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  body.dark #next-question-btn {
+    background: #3399ff;
+  }
+  /* Writing Practice */
+  #writing-input {
+    width: 100%;
+    height: 120px;
+    padding: 10px;
+    font-size: 1.1em;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    resize: vertical;
+    background: white;
+    color: black;
+  }
+  body.dark #writing-input {
+    background: #222;
+    color: #eee;
+    border-color: #555;
+  }
+  #writing-feedback {
+    margin-top: 10px;
+    font-weight: 700;
+  }
+  .writing-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  .writing-buttons button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    background: #007ACC;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+  .writing-buttons button:hover {
+    background: #005a99;
+  }
+  body.dark .writing-buttons button {
+    background: #3399ff;
+    color: #222;
+  }
+  /* Add Word */
+  form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  form input, form select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    font-size: 1em;
+  }
+  body.dark form input, body.dark form select {
+    background: #222;
+    color: #eee;
+    border-color: #555;
+  }
+  form button {
+    padding: 9px 18px;
+    background: #007ACC;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  form button:hover {
+    background: #005a99;
+  }
+  body.dark form button {
+    background: #3399ff;
+    color: #222;
+  }
+  /* Progress */
+  #progress-list {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  #progress-list li {
+    margin-bottom: 8px;
+  }
+  /* Chatbot */
+  #chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    border: 2px solid #007ACC;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #e6f0ff;
+  }
+  body.dark #chat-container {
+    background: #222;
+    border-color: #3399ff;
+  }
+  #chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+  }
+  .chat-message {
+    margin-bottom: 15px;
+    max-width: 80%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    line-height: 1.3;
+  }
+  .chat-user {
+    background: #007ACC;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 0;
+  }
+  body.dark .chat-user {
+    background: #3399ff;
+    color: #222;
+  }
+  .chat-bot {
+    background: #d9eaff;
+    color: #222;
+    align-self: flex-start;
+    border-bottom-left-radius: 0;
+  }
+  body.dark .chat-bot {
+    background: #445a99;
+    color: #eee;
+  }
+  #chat-input-area {
+    display: flex;
+    border-top: 2px solid #007ACC;
+    background: white;
+  }
+  body.dark #chat-input-area {
+    background: #111;
+    border-color: #3399ff;
+  }
+  #chat-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: none;
+    font-size: 1em;
+    outline: none;
+  }
+  body.dark #chat-input {
+    background: #222;
+    color: #eee;
+  }
+  #chat-send-btn {
+    background: #007ACC;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+  }
+  #chat-send-btn:hover {
+    background: #005a99;
+  }
+  body.dark #chat-send-btn {
+    background: #3399ff;
+    color: #222;
+  }
+  /* Dark mode toggle */
+  #dark-mode-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: #007ACC;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.3);
+    transition: background-color 0.3s ease;
+    z-index: 999;
+  }
+  #dark-mode-toggle:hover {
+    background: #005a99;
+  }
+  body.dark #dark-mode-toggle {
+    background: #3399ff;
+    color: #222;
+  }
+</style>
+</head>
+<body>
+<header>French Helper App by Paarth Mahajan</header>
+<nav>
+  <button id="btn-vocab" class="active">Vocabulary</button>
+  <button id="btn-quiz">Quiz</button>
+  <button id="btn-writing">Writing Practice</button>
+  <button id="btn-addword">Add Word</button>
+  <button id="btn-progress">Progress</button>
+  <button id="btn-chatbot">French Chatbot</button>
+</nav>
+
+<main>
+  <!-- Vocabulary Section -->
+  <section id="section-vocab" class="active">
+    <h2>Vocabulary</h2>
+    <div class="vocab-container">
+      <div class="vocab-list" id="easy-vocab">
+        <h3>Easy Words</h3>
+        <ul></ul>
+      </div>
+      <div class="vocab-list" id="complex-vocab">
+        <h3>Complex Words</h3>
+        <ul></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quiz Section -->
+  <section id="section-quiz">
+    <h2>Quiz</h2>
+    <div id="quiz-timer" style="font-weight:bold; margin-bottom:10px;">Time Left: <span id="timer">60</span>s</div>
+    <div class="quiz-question" id="quiz-question"></div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div id="quiz-feedback"></div>
+    <button id="next-question-btn" style="display:none;">Next Question</button>
+    <div id="quiz-result" style="margin-top: 20px; font-weight:700; font-size:1.3em;"></div>
+  </section>
+
+  <!-- Writing Practice Section -->
+  <section id="section-writing">
+    <h2>Writing Practice</h2>
+    <textarea id="writing-input" placeholder="Write your French sentence here..."></textarea>
+    <div class="writing-buttons">
+      <button id="check-writing-btn">Check Writing</button>
+      <button id="clear-writing-btn">Clear</button>
+    </div>
+    <div id="writing-feedback"></div>
+  </section>
+
+  <!-- Add Word Section -->
+  <section id="section-addword">
+    <h2>Add New Vocabulary Word</h2>
+    <form id="add-word-form">
+      <input type="text" id="new-french" placeholder="French Word/Phrase" required />
+      <input type="text" id="new-english" placeholder="English Meaning" required />
+      <select id="new-difficulty" required>
+        <option value="" disabled selected>Difficulty</option>
+        <option value="easy">Easy</option>
+        <option value="complex">Complex</option>
+      </select>
+      <button type="submit">Add Word</button>
+    </form>
+  </section>
+
+  <!-- Progress Section -->
+  <section id="section-progress">
+    <h2>Your Learning Progress</h2>
+    <ul id="progress-list"></ul>
+  </section>
+
+  <!-- Chatbot Section -->
+  <section id="section-chatbot">
+    <h2>French Chatbot - Ask your French questions!</h2>
+    <div id="chat-container">
+      <div id="chat-messages"></div>
+      <div id="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Ask something about French..." />
+        <button id="chat-send-btn">Send</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button id="dark-mode-toggle">Toggle Dark Mode</button>
+
+<script>
+(() => {
+  // Data: Vocabulary words
+  const vocabulary = {
+    easy: [
+      { french: "bonjour", english: "hello" },
+      { french: "merci", english: "thank you" },
+      { french: "chat", english: "cat" },
+      { french: "chien", english: "dog" },
+      { french: "pomme", english: "apple" },
+      { french: "maison", english: "house" },
+      { french: "ami", english: "friend" },
+      { french: "livre", english: "book" },
+      { french: "école", english: "school" },
+      { french: "fleur", english: "flower" },
+      { french: "eau", english: "water" },
+      { french: "pain", english: "bread" },
+      { french: "soleil", english: "sun" },
+      { french: "lune", english: "moon" },
+      { french: "voiture", english: "car" }
+    ],
+    complex: [
+      { french: "parapluie", english: "umbrella" },
+      { french: "bibliothèque", english: "library" },
+      { french: "ordinateur", english: "computer" },
+      { french: "chocolat", english: "chocolate" },
+      { french: "oiseau", english: "bird" },
+      { french: "émerveiller", english: "to amaze" },
+      { french: "pendaison", english: "hanging" },
+      { french: "incroyable", english: "incredible" },
+      { french: "aventure", english: "adventure" },
+      { french: "développement", english: "development" },
+      { french: "accomplissement", english: "achievement" },
+      { french: "épanouissement", english: "blossoming" },
+      { french: "réussite", english: "success" },
+      { french: "découverte", english: "discovery" },
+      { french: "enthousiasme", english: "enthusiasm" }
+    ]
+  };
+
+  // Quiz Questions (French-English multiple choice)
+  const quizQuestions = [
+    { q: "Comment dit-on 'apple' en français ?", options: ["pomme", "chien", "chat", "pain"], answer: "pomme" },
+    { q: "Que signifie 'bibliothèque' ?", options: ["library", "book", "school", "pen"], answer: "library" },
+    { q: "Traduisez 'ordinateur'", options: ["computer", "keyboard", "mouse", "screen"], answer: "computer" },
+    { q: "Que veut dire 'bonjour' ?", options: ["goodbye", "hello", "please", "thank you"], answer: "hello" },
+    { q: "Comment dit-on 'dog' en français ?", options: ["chat", "chien", "oiseau", "cheval"], answer: "chien" },
+    { q: "Que signifie 'école' ?", options: ["school", "church", "house", "car"], answer: "school" },
+    { q: "Traduisez 'voiture'", options: ["car", "bike", "bus", "plane"], answer: "car" },
+    { q: "Que veut dire 'merci' ?", options: ["please", "thank you", "sorry", "hello"], answer: "thank you" },
+    { q: "Comment dit-on 'water' en français ?", options: ["eau", "lait", "vin", "jus"], answer: "eau" },
+    { q: "Que signifie 'fleur' ?", options: ["flower", "fruit", "tree", "grass"], answer: "flower" },
+    { q: "Traduisez 'incroyable'", options: ["incredible", "boring", "slow", "small"], answer: "incredible" },
+    { q: "Que veut dire 'aventure' ?", options: ["adventure", "danger", "game", "travel"], answer: "adventure" },
+    { q: "Comment dit-on 'success' en français ?", options: ["succès", "échec", "travail", "chance"], answer: "succès" },
+    { q: "Que signifie 'émerveiller' ?", options: ["to amaze", "to cry", "to laugh", "to speak"], answer: "to amaze" },
+    { q: "Traduisez 'pain'", options: ["bread", "butter", "cheese", "milk"], answer: "bread" },
+    { q: "Que veut dire 'lune' ?", options: ["moon", "star", "sun", "cloud"], answer: "moon" },
+    { q: "Comment dit-on 'friend' en français ?", options: ["ami", "ennemi", "voisin", "collègue"], answer: "ami" },
+    { q: "Que signifie 'découverte' ?", options: ["discovery", "loss", "failure", "win"], answer: "discovery" },
+    { q: "Traduisez 'enthousiasme'", options: ["enthusiasm", "boredom", "anger", "fear"], answer: "enthusiasm" },
+    { q: "Que veut dire 'pain' ?", options: ["bread", "pain", "water", "fire"], answer: "bread" },
+    { q: "Comment dit-on 'bird' en français ?", options: ["oiseau", "chien", "chat", "cheval"], answer: "oiseau" },
+    { q: "Que signifie 'réussite' ?", options: ["success", "failure", "problem", "help"], answer: "success" },
+    { q: "Traduisez 'chocolat'", options: ["chocolate", "vanilla", "strawberry", "lemon"], answer: "chocolate" },
+    { q: "Que veut dire 'pendaison' ?", options: ["hanging", "walking", "jumping", "running"], answer: "hanging" },
+    { q: "Comment dit-on 'flower' en français ?", options: ["fleur", "fruit", "feuille", "branche"], answer: "fleur" },
+    { q: "Que signifie 'ami' ?", options: ["friend", "enemy", "stranger", "neighbor"], answer: "friend" },
+    { q: "Traduisez 'école'", options: ["school", "office", "church", "shop"], answer: "school" },
+    { q: "Que veut dire 'ordinateur' ?", options: ["computer", "phone", "television", "radio"], answer: "computer" },
+    { q: "Comment dit-on 'sun' en français ?", options: ["soleil", "lune", "étoile", "nuage"], answer: "soleil" },
+    { q: "Que signifie 'réussite' ?", options: ["success", "failure", "problem", "help"], answer: "success" },
+  ];
+
+  // Local storage keys for persistence
+  const LS_VOCAB = 'french_helper_vocab';
+  const LS_PROGRESS = 'french_helper_progress';
+  const LS_DARKMODE = 'french_helper_darkmode';
+
+  // State variables
+  let currentQuizIndex = 0;
+  let score = 0;
+  let quizTimer = null;
+  let quizTimeLeft = 60;
+
+  // Elements
+  const sections = {
+    vocab: document.getElementById('section-vocab'),
+    quiz: document.getElementById('section-quiz'),
+    writing: document.getElementById('section-writing'),
+    addword: document.getElementById('section-addword'),
+    progress: document.getElementById('section-progress'),
+    chatbot: document.getElementById('section-chatbot'),
+  };
+  const navButtons = {
+    vocab: document.getElementById('btn-vocab'),
+    quiz: document.getElementById('btn-quiz'),
+    writing: document.getElementById('btn-writing'),
+    addword: document.getElementById('btn-addword'),
+    progress: document.getElementById('btn-progress'),
+    chatbot: document.getElementById('btn-chatbot'),
+  };
+  const vocabLists = {
+    easy: document.querySelector('#easy-vocab ul'),
+    complex: document.querySelector('#complex-vocab ul')
+  };
+
+  const quizQuestionEl = document.getElementById('quiz-question');
+  const quizOptionsEl = document.getElementById('quiz-options');
+  const quizFeedbackEl = document.getElementById('quiz-feedback');
+  const nextQuestionBtn = document.getElementById('next-question-btn');
+  const quizResultEl = document.getElementById('quiz-result');
+  const quizTimerEl = document.getElementById('timer');
+
+  const writingInput = document.getElementById('writing-input');
+  const writingFeedback = document.getElementById('writing-feedback');
+  const checkWritingBtn = document.getElementById('check-writing-btn');
+  const clearWritingBtn = document.getElementById('clear-writing-btn');
+
+  const addWordForm = document.getElementById('add-word-form');
+  const newFrenchInput = document.getElementById('new-french');
+  const newEnglishInput = document.getElementById('new-english');
+  const newDifficultySelect = document.getElementById('new-difficulty');
+
+  const progressList = document.getElementById('progress-list');
+
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput = document.getElementById('chat-input');
+  const chatSendBtn = document.getElementById('chat-send-btn');
+
+  const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+  // Load vocab from localStorage
+  function loadVocab() {
+    const stored = localStorage.getItem(LS_VOCAB);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.easy && parsed.complex) {
+          vocabulary.easy = parsed.easy;
+          vocabulary.complex = parsed.complex;
+        }
+      } catch {}
+    }
+  }
+  // Save vocab to localStorage
+  function saveVocab() {
+    localStorage.setItem(LS_VOCAB, JSON.stringify(vocabulary));
+  }
+
+  // Load progress from localStorage
+  function loadProgress() {
+    const stored = localStorage.getItem(LS_PROGRESS);
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {}
+    }
+    return { quizScores: [], writingAttempts: 0, wordsAdded: 0 };
+  }
+  // Save progress to localStorage
+  function saveProgress(progress) {
+    localStorage.setItem(LS_PROGRESS, JSON.stringify(progress));
+  }
+
+  let progress = loadProgress();
+
+  // Show vocabulary lists
+  function renderVocab() {
+    vocabLists.easy.innerHTML = '';
+    vocabLists.complex.innerHTML = '';
+    vocabulary.easy.forEach(({ french, english }) => {
+      const li = document.createElement('li');
+      li.textContent = `${french} — ${english}`;
+      vocabLists.easy.appendChild(li);
+    });
+    vocabulary.complex.forEach(({ french, english }) => {
+      const li = document.createElement('li');
+      li.textContent = `${french} — ${english}`;
+      vocabLists.complex.appendChild(li);
+    });
+  }
+
+  // Switch sections on nav button click
+  function switchSection(sectionKey) {
+    for (const key in sections) {
+      if (key === sectionKey) {
+        sections[key].classList.add('active');
+        navButtons[key].classList.add('active');
+      } else {
+        sections[key].classList.remove('active');
+        navButtons[key].classList.remove('active');
+      }
+    }
+    if (sectionKey === 'vocab') renderVocab();
+    else if (sectionKey === 'progress') renderProgress();
+    else if (sectionKey === 'quiz') startQuiz();
+  }
+
+  // Add event listeners for nav buttons
+  for (const key in navButtons) {
+    navButtons[key].addEventListener('click', () => switchSection(key));
+  }
+
+  // Quiz functionality
+  function startQuiz() {
+    currentQuizIndex = 0;
+    score = 0;
+    quizResultEl.textContent = '';
+    nextQuestionBtn.style.display = 'none';
+    quizFeedbackEl.textContent = '';
+    quizTimeLeft = 60;
+    quizTimerEl.textContent = quizTimeLeft;
+    loadQuizQuestion();
+    if (quizTimer) clearInterval(quizTimer);
+    quizTimer = setInterval(() => {
+      quizTimeLeft--;
+      quizTimerEl.textContent = quizTimeLeft;
+      if (quizTimeLeft <= 0) {
+        clearInterval(quizTimer);
+        endQuiz();
+      }
+    }, 1000);
+  }
+
+  function loadQuizQuestion() {
+    if (currentQuizIndex >= quizQuestions.length) {
+      endQuiz();
+      return;
+    }
+    const q = quizQuestions[currentQuizIndex];
+    quizQuestionEl.textContent = q.q;
+    quizOptionsEl.innerHTML = '';
+    quizFeedbackEl.textContent = '';
+    nextQuestionBtn.style.display = 'none';
+
+    q.options.forEach(option => {
+      const btn = document.createElement('button');
+      btn.textContent = option;
+      btn.addEventListener('click', () => {
+        handleAnswer(option);
+      });
+      quizOptionsEl.appendChild(btn);
+    });
+  }
+
+  function handleAnswer(selected) {
+    const correct = quizQuestions[currentQuizIndex].answer;
+    const buttons = quizOptionsEl.querySelectorAll('button');
+    buttons.forEach(btn => btn.disabled = true);
+    if (selected === correct) {
+      quizFeedbackEl.textContent = 'Correct! 🎉';
+      score++;
+    } else {
+      quizFeedbackEl.textContent = `Wrong! Correct answer: "${correct}"`;
+    }
+    nextQuestionBtn.style.display = 'inline-block';
+  }
+
+  nextQuestionBtn.addEventListener('click', () => {
+    currentQuizIndex++;
+    loadQuizQuestion();
+  });
+
+  function endQuiz() {
+    clearInterval(quizTimer);
+    quizQuestionEl.textContent = '';
+    quizOptionsEl.innerHTML = '';
+    nextQuestionBtn.style.display = 'none';
+    quizFeedbackEl.textContent = '';
+    quizResultEl.textContent = `Quiz Over! Your score: ${score} / ${quizQuestions.length}`;
+    progress.quizScores.push(score);
+    saveProgress(progress);
+  }
+
+  // Writing practice checker (simple French word detection)
+  const frenchWordsSet = new Set([...vocabulary.easy, ...vocabulary.complex].map(w => w.french.toLowerCase()));
+
+  checkWritingBtn.addEventListener('click', () => {
+    const text = writingInput.value.trim().toLowerCase();
+    if (!text) {
+      writingFeedback.textContent = 'Please write something first.';
+      return;
+    }
+    // Basic check: count how many words are in vocab
+    const words = text.split(/\s+/);
+    let knownCount = 0;
+    words.forEach(w => {
+      if (frenchWordsSet.has(w)) knownCount++;
+    });
+    const percentKnown = Math.round((knownCount / words.length) * 100);
+    writingFeedback.textContent = `You used ${knownCount} known French words out of ${words.length} (${percentKnown}%). Keep practicing!`;
+    progress.writingAttempts++;
+    saveProgress(progress);
+  });
+
+  clearWritingBtn.addEventListener('click', () => {
+    writingInput.value = '';
+    writingFeedback.textContent = '';
+  });
+
+  // Add new vocab word
+  addWordForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const french = newFrenchInput.value.trim();
+    const english = newEnglishInput.value.trim();
+    const difficulty = newDifficultySelect.value;
+    if (!french || !english || !difficulty) {
+      alert('Please fill all fields.');
+      return;
+    }
+    if (difficulty !== 'easy' && difficulty !== 'complex') {
+      alert('Invalid difficulty.');
+      return;
+    }
+    // Check duplicates
+    const exists = vocabulary[difficulty].some(w => w.french.toLowerCase() === french.toLowerCase());
+    if (exists) {
+      alert('This French word already exists in the list.');
+      return;
+    }
+    vocabulary[difficulty].push({ french, english });
+    saveVocab();
+    progress.wordsAdded++;
+    saveProgress(progress);
+    alert(`Added "${french}" (${english}) to ${difficulty} vocabulary.`);
+    newFrenchInput.value = '';
+    newEnglishInput.value = '';
+    newDifficultySelect.value = '';
+    if (sections.vocab.classList.contains('active')) renderVocab();
+  });
+
+  // Render progress summary
+  function renderProgress() {
+    progressList.innerHTML = '';
+    const li1 = document.createElement('li');
+    li1.textContent = `Quizzes taken: ${progress.quizScores.length}`;
+    const li2 = document.createElement('li');
+    li2.textContent = `Writing practice attempts: ${progress.writingAttempts}`;
+    const li3 = document.createElement('li');
+    li3.textContent = `Words added to vocabulary: ${progress.wordsAdded}`;
+    const avgScore = progress.quizScores.length
+      ? (progress.quizScores.reduce((a,b) => a+b, 0) / progress.quizScores.length).toFixed(2)
+      : 0;
+    const li4 = document.createElement('li');
+    li4.textContent = `Average quiz score: ${avgScore}`;
+    progressList.appendChild(li1);
+    progressList.appendChild(li2);
+    progressList.appendChild(li3);
+    progressList.appendChild(li4);
+  }
+
+  // Chatbot logic (simple responses)
+  function chatbotResponse(userText) {
+    const text = userText.toLowerCase();
+    if (text.includes('bonjour')) return 'Bonjour! Comment puis-je vous aider aujourd\'hui?';
+    if (text.includes('merci')) return 'De rien! N\'hésitez pas à poser d\'autres questions.';
+    if (text.includes('comment') && text.includes('dire')) {
+      // try to extract word to translate
+      const words = text.split(' ');
+      let wordToTranslate = words[words.length-1].replace(/[?.!]/g, '');
+      // Find French translation of English word or vice versa
+      for (const diff of ['easy', 'complex']) {
+        for (const w of vocabulary[diff]) {
+          if (w.english.toLowerCase() === wordToTranslate) return `On dit "${w.french}" en français.`;
+          if (w.french.toLowerCase() === wordToTranslate) return `Cela signifie "${w.english}" en anglais.`;
+        }
+      }
+      return 'Je ne connais pas ce mot, désolé.';
+    }
+    if (text.includes('help') || text.includes('aide')) return 'Je peux vous aider avec des traductions, des conjugaisons simples, et des exercices.';
+    return 'Je suis désolé, je ne comprends pas votre question. Essayez de demander une traduction ou une explication.';
+  }
+
+  chatSendBtn.addEventListener('click', () => {
+    const userText = chatInput.value.trim();
+    if (!userText) return;
+    appendChatMessage('user', userText);
+    chatInput.value = '';
+    setTimeout(() => {
+      const botReply = chatbotResponse(userText);
+      appendChatMessage('bot', botReply);
+    }, 500);
+  });
+
+  chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      chatSendBtn.click();
+      e.preventDefault();
+    }
+  });
+
+  function appendChatMessage(sender, text) {
+    const div = document.createElement('div');
+    div.classList.add('chat-message');
+    div.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+    div.textContent = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  // Dark mode toggle
+  function loadDarkMode() {
+    const stored = localStorage.getItem(LS_DARKMODE);
+    if (stored === 'true') {
+      document.body.classList.add('dark');
+    }
+  }
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark');
+    localStorage.setItem(LS_DARKMODE, document.body.classList.contains('dark'));
+  }
+  darkModeToggle.addEventListener('click', toggleDarkMode);
+  loadDarkMode();
+
+  // Initialize
+  loadVocab();
+  renderVocab();
+  switchSection('vocab');
+})();
+</script>
+</body>
+</html>
+

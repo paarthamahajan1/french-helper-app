@@ -33,8 +33,7 @@ No installation needed!
 The app is fully browser-based and works on desktop and mobile.
 
 To use it:
-1. Visit the live app: [Live Site Coming Soon](#)
-2. Explore vocabulary, take quizzes, write sentences, and chat with the bot!
+1. Visit the live app: https://frenchhelperpaarthmahajan.netlify.app . Explore vocabulary, take quizzes, write sentences, and chat with the bot!
 3. Your progress is saved locally.
 
 ---
@@ -77,8 +76,7 @@ This app was created as a **personal passion project** and learning tool for Fre
 
 ## 🔗 Links
 
-- 🌐 Live App: [Coming Soon](#)
-- 💻 GitHub Repo: [https://github.com/paarthmahajan1/french-helper-app](https://github.com/paarthmahajan1/french-helper-app)
+- 🌐 Live App: https://frenchhelperpaarthmahajan.netlify.app - 💻 GitHub Repo: [https://github.com/paarthmahajan1/french-helper-app](https://github.com/paarthmahajan1/french-helper-app)
 - 📄 Personal Portfolio: [www.paarthmahajan09.com](http://www.paarthmahajan09.com)
 
 ---
